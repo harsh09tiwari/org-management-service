@@ -2,14 +2,17 @@
   "name": "org-management-service",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "source/index.js",
+  "types": "module",
   "scripts": {
+    "start": "node source/index.js",
+    "dev": "nodemon source/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",

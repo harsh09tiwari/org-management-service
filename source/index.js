@@ -3,6 +3,7 @@ import {connectDB} from './library/db.js';
 import dotenv from 'dotenv'
 
 import adminAuthRoute from './routes/admin.auth.route.js';
+import createOrganization from './routes/organization.create.route.js';
 
 dotenv.config();    // laoding env variables
 const PORT = process.env.PORT || 5000;
@@ -13,13 +14,8 @@ const app = express();
 app.use(express.json());
 
 
-
-
 app.use('/api', adminAuthRoute);
-
-
-
-
+app.use('/api/org', createOrganization)
 
 
 // app.get('/test', (req, res) => {

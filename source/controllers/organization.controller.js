@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import {Organization} from '../models/organization.model.js';
 import {Admin} from '../models/admin.model.js';
+import e from 'express';
 
 
 //  Function to create a dynamic collection for an organization which can be used to store organization-specific data
@@ -26,9 +27,9 @@ const createDynamicOrgCollection = async (collectionName) => {
 
 
 
-
 //   Controller function to handle organization creation
 export const createOrganization = async (req, res) => {
+
     try {
         const { organization_name, email, password } = req.body;
         // console.log("1. Received org creation request for:", organization_name, email)   ;        
@@ -37,9 +38,10 @@ export const createOrganization = async (req, res) => {
         // Check for missing fields
         if (!organization_name || !email || !password) {
             // console.log("2. lol");
-            
             return res.status(400).json({ message: 'Please provide all details' });
         }
+
+
 
         const existingOrg = await Organization.findOne({ email });
         // console.log("3. Org Check Complete. Exists?", !!existingOrg);
@@ -47,6 +49,7 @@ export const createOrganization = async (req, res) => {
         if (existingOrg) {
             return res.status(400).json({ message: 'Organization already exists with this email' });
         }
+
 
         const existingAdmin = await Admin.findOne({ email });
         // console.log("4 admin exist", !!existingAdmin);
@@ -69,14 +72,12 @@ export const createOrganization = async (req, res) => {
             organization_name 
         });
         await newAdmin.save();
-
         // console.log("6. Admin user created with ID:", newAdmin._id);
         
 
 //  Now creating dynamic collection for the organization        
         const collection_name = `org_${organization_name.toLowerCase().replace(/\s+/g, '_')}`;
         await createDynamicOrgCollection(collection_name);
-
         // console.log("7. Dynamic collection created:", collection_name);
 
 //  Now saving organization details
@@ -86,8 +87,9 @@ export const createOrganization = async (req, res) => {
             admin_user_id: newAdmin._id
         });
         await newOrganization.save();
-
         // console.log("8. Organization created with ID:", newOrganization._id);
+
+
 
 
         res.status(201).json({
@@ -100,12 +102,40 @@ export const createOrganization = async (req, res) => {
         })
     }
     catch (error) {
-        console.error('Error creating organization:', error);
+        console.error('Error in creating organization controller: ', error);
         
         if (error.code === 11000) {
             return res.status(400).json({ message: 'Duplicate field value entered (Email or Org Name already exists)' });
         }
-
         res.status(500).json({ message: 'Internal server error: ' + error.message });
     }
 }
+
+
+
+
+export const getOrganization = async (req, res) => {
+
+    try {   
+        const { organization_name } = req.query; // receiving the name from the url
+
+        if(!organization_name){
+            return res.status(400).json({message : "Please provide organization name"})
+        }
+
+        const organization = await Organization.findOne({organization_name});
+        
+        if(!organization){
+            return res.status(404).json({message: "Organization not found"});
+        }
+
+        res.status(200).json({
+            message : "Organization fetched successfully",
+            data : organization
+        })
+        
+    } catch (error) {
+        console.error('Error in getting organization controller: ', error);
+        res.status(500).json({ message: 'Internal server error: ' + error.message });
+    }
+};

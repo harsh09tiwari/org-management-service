@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { Organization } from "./organization.model";
 
 const adminSchema = new mongoose.Schema({
     username: {
@@ -18,4 +17,4 @@ const adminSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-export const Admin = mongoose.model('Admin', adminSchema);
+export const Admin = mongoose.model('Admin', adminSchema);  // saving the schema as a model named 'Admin' and can refer it in other models

@@ -102,4 +102,3 @@ If successful, you will see a message in the terminal:
 
 > `Server is running on port: 5000`
 > `MongoDB Connected`
-    Switch -->|Company B| CollB

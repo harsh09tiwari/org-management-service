@@ -44,3 +44,39 @@ If successful, you will see a message in the terminal:
 
 > `Server is running on port: 5000`
 > `MongoDB Connected`
+
+
+
+## 🏗️ High-Level Architecture
+
+The system uses a **Collection-Based Multi-Tenancy** approach. Every organization gets its own dedicated collection (e.g., `org_company_a`, `org_company_b`) to ensure strict data isolation.
+```mermaid
+graph TD
+    %% Nodes
+    User[Client / Postman]
+    API[Express API Server]
+    Auth{Is Logged In?}
+    Router{Route Handler}
+    
+    %% Databases
+    AdminDB[(Admin Collection)]
+    MasterDB[(Organization List)]
+    
+    %% Dynamic Collections
+    Switch{Which Company?}
+    CollA[(Collection: org_company_a)]
+    CollB[(Collection: org_company_b)]
+    
+    %% Connections
+    User -->|1. Request| API
+    API -->|2. Verify Token| Auth
+    
+    Auth -->|No| Error[Error: 401 Unauthorized]
+    Auth -->|Yes| Router
+    
+    Router -->|Login| AdminDB
+    Router -->|Get Info| MasterDB
+    
+    Router -->|3. Create / Update / Delete| Switch{Which Company?}
+    Switch -->|Company A| CollA
+    Switch -->|Company B| CollB

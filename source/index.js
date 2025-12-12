@@ -9,14 +9,11 @@ dotenv.config();    // laoding env variables
 const PORT = process.env.PORT || 5000;
 
 
-
 const app = express();
 app.use(express.json());
 
-
-app.use('/api', adminAuthRoute);
+app.use('/api/admin', adminAuthRoute);
 app.use('/api/org', organizationRoutes);
-
 
 // app.get('/test', (req, res) => {
 //     res.json({ message: 'Server is working' });

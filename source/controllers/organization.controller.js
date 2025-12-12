@@ -118,6 +118,20 @@ export const getOrganization = async (req, res) => {
     }
 };
 
+// function to list all the organizations (for testing purposes)
+export const listOrganizations = async (req, res) => {
+    try {
+        const organizations = await Organization.find({}, 'organization_name collection_name admin_user_id createdAt');
+        res.status(200).json({
+            message: "Organizations fetched successfully",
+            data: organizations
+        });
+        
+    } catch (error) {
+        console.log('Error in listing organizations controller: ', error);
+        res.status(500).json({ message: 'Internal server error: ' + error.message });
+    }
+}
 
 
 export const deleteOrganization = async (req, res) => {

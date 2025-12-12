@@ -23,28 +23,25 @@ const createDynamicOrgCollection = async (collectionName) => {
 };
 
 
+
 //   Controller function to handle organization creation
 export const createOrganization = async (req, res) => {
 
     try {
         const { organization_name, email, password } = req.body;
-        // console.log("1. Received org creation request for:", organization_name, email)   ;        
         
         // Check for missing fields
         if (!organization_name || !email || !password) {
-            // console.log("2. lol");
             return res.status(400).json({ message: 'Please provide all details' });
         }
 
         const existingOrg = await Organization.findOne({ email });
-        // console.log("3. Org Check Complete. Exists?", !!existingOrg);
 
         if (existingOrg) {
             return res.status(400).json({ message: 'Organization already exists with this email' });
         }
 
         const existingAdmin = await Admin.findOne({ email });
-        // console.log("4 admin exist", !!existingAdmin);
         
         if (existingAdmin) {
             return res.status(400).json({ message: 'An account with this email already exists' });
@@ -53,7 +50,6 @@ export const createOrganization = async (req, res) => {
 //  Now we will hash the password before saving for security
         const salt = await bcrypt.genSalt(10)  //  "genSalt()" is a bcrypt library method name. 
         const hashedPassword = await bcrypt.hash(password,salt)   
-        // console.log("5. Password hashed");
 
 // saving admin user first and then organization details        
         const newAdmin = new Admin({ 
@@ -62,12 +58,10 @@ export const createOrganization = async (req, res) => {
             organization_name 
         });
         await newAdmin.save();
-        // console.log("6. Admin user created with ID:", newAdmin._id);
-        
+    
 //  Now creating dynamic collection for the organization        
         const collection_name = `org_${organization_name.toLowerCase().replace(/\s+/g, '_')}`;
-        await createDynamicOrgCollection(collection_name);
-        // console.log("7. Dynamic collection created:", collection_name);
+        await createDynamicOrgCollection(collection_name); 
 
 //  Now saving organization details
         const newOrganization = new Organization({
@@ -76,7 +70,6 @@ export const createOrganization = async (req, res) => {
             admin_user_id: newAdmin._id
         });
         await newOrganization.save();
-        // console.log("8. Organization created with ID:", newOrganization._id);
 
         res.status(201).json({
             message: 'Organization created successfully',
@@ -96,6 +89,7 @@ export const createOrganization = async (req, res) => {
         res.status(500).json({ message: 'Internal server error: ' + error.message });
     }
 }
+
 
 
 export const getOrganization = async (req, res) => {
@@ -123,6 +117,7 @@ export const getOrganization = async (req, res) => {
         res.status(500).json({ message: 'Internal server error: ' + error.message });
     }
 };
+
 
 
 export const deleteOrganization = async (req, res) => {
@@ -168,3 +163,81 @@ export const deleteOrganization = async (req, res) => {
 };
 
 
+
+//  We will create a helper fuction to rename the collection when organization name is updated
+const updateOrgCollectionName = async (oldName, newName) => {
+    try {
+        await mongoose.connection.db.renameCollection(oldName, newName);
+        console.log(`Collection renamed from ${oldName} to ${newName} successfully.`);
+    } catch (error) {
+        console.log(`Could not rename collection from ${oldName} to ${newName}: `, error);
+    }
+}
+
+export const updateOrganization = async (req, res) => {
+    try {
+        const currentOrgName= req.query.organization_name;
+        const {new_organization_name, email, password} = req.body;
+
+        if(!currentOrgName){
+            return res.status(400).json({message : "Please provide current organization name"});
+        }
+
+        const organization = await Organization.findOne({organization_name: currentOrgName});
+        if(!organization){
+            return res.status(404).json({message: "Organization not found"});
+        }
+
+        const admin = await Admin.findById(organization.admin_user_id);
+
+        //  checking if passwrord needs to be updated
+        if(password){
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password,salt);
+            admin.password = hashedPassword;
+        }
+
+        // We are using two email keywords here. First one is checking if email is provided in the request body and the second is checking if the provided email is different from the existing email of the admin.
+        if(email && email !== admin.email){
+            const existingAdmin = await Admin.findOne({ email });
+            if (existingAdmin) {
+                return res.status(400).json({ message: 'An account with this email already exists' });
+            }
+            admin.email = email;
+        }
+        
+        // checking if organization name needs to be updated
+        if(new_organization_name && new_organization_name !== organization.organization_name){
+            const existingOrg = await Organization.findOne({ organization_name: new_organization_name });
+            if (existingOrg) {
+                return res.status(400).json({ message: 'Organization already exists with this name' });
+            }
+            organization.organization_name = new_organization_name;   // update the organization name
+
+            // now updating the collection name accordingly
+            const oldCollectionName = organization.collection_name;
+            const newCollectionName = `org_${new_organization_name.toLowerCase().replace(/\s+/g, '_')}`;
+
+            updateOrgCollectionName(oldCollectionName, newCollectionName);   // calling the helper function to rename collection
+            
+            organization.collection_name = newCollectionName;   // update the collection name
+            admin.organization_name = new_organization_name; // update organization name in admin as well
+        }
+        
+        await admin.save();
+        await organization.save();
+
+        res.status(200).json({
+            message : "Organization updated successfully",
+            data : {
+                organization_name: organization.organization_name,
+                collection_name: organization.collection_name,
+                admin_user_id: organization.admin_user_id
+            }
+        })
+        
+    } catch (error) {
+        console.error('Error in updating organization controller: ', error);
+        res.status(500).json({ message: 'Internal server error: ' + error.message });
+    }
+}

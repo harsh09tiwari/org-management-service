@@ -3,7 +3,7 @@ import {connectDB} from './library/db.js';
 import dotenv from 'dotenv'
 
 import adminAuthRoute from './routes/admin.auth.route.js';
-import organizationRoutes from './routes/organization.create.route.js';
+import organizationRoutes from './routes/organization.crud.route.js';
 
 dotenv.config();    // laoding env variables
 const PORT = process.env.PORT || 5000;

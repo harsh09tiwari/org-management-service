@@ -102,3 +102,33 @@ If successful, you will see a message in the terminal:
 
 > `Server is running on port: 5000`
 > `MongoDB Connected`
+> 
+
+
+
+## 📸 Project Screenshots
+
+### 1. Dynamic Multi-Tenant Collections (MongoDB)
+> This shows how a separate collection is created for each organization (e.g., `org_google`, `org_youtube`).
+> 
+![MongoDB Collections](./screenshots/mongo_collections.png.png)
+
+### 2. API Testing (Postman)
+
+**Admin Login (JWT Token Generation):**
+![Admin Login](./screenshots/postman_admin_login.png.png)
+
+**Create Organization:**
+![Create Org](./screenshots/postman_create.png.png)
+
+**Get Organization by Name**
+![Get Org](./screenshots/postman_get.png.png)
+
+**Update Organization (Renaming & Syncing):**
+![Update Org](./screenshots/postman_update.png.png)
+
+**Delete Organization**
+![Delete Org](./screenshots/postman_delete.png.png)
+
+**Get All Organizations:**
+![Get All](./screenshots/postman_getAll.png.png)

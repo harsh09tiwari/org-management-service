@@ -15,7 +15,7 @@ const createDynamicOrgCollection = async (collectionName) => {
     const dynamicSchema = new mongoose.Schema({ 
         data_field : String,
         created_at: {type: Date, default: Date.now}
-    }, {strict: false});    // false will allow dynamic schema
+    }, {strict: false});    // false will allow dynamic schema 
 
     const DynamicModel = mongoose.model(collectionName, dynamicSchema, collectionName);   // Compile the model (this registers it in Mongoose)  // the third parameter is to specify collection name explicitly as mongoose by default pluralizes the model name by adding 's' at the end
     
@@ -242,7 +242,7 @@ export const updateOrganization = async (req, res) => {
         await organization.save();
 
         res.status(200).json({
-            message : "Organization updated successfully",
+            message : `Organization ${currentOrgName} updated successfully to ${organization.organization_name}`,
             data : {
                 organization_name: organization.organization_name,
                 collection_name: organization.collection_name,

@@ -104,6 +104,21 @@ If successful, you will see a message in the terminal:
 > `MongoDB Connected`
 > 
 
+## 🔌 API Endpoints
+
+### 👤 Admin
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/admin/login` | Login as Admin to receive JWT Token |
+
+### 🏢 Organization
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/org/create` | Create a new organization (and its dynamic collection) |
+| `GET` | `/api/org/get?organization_name=...` | Get details of a specific organization |
+| `GET` | `/api/org/getAll` | **(New)** List all registered organizations |
+| `PUT` | `/api/org/update` | Update organization name (renames collection automatically) |
+| `DELETE` | `/api/org/delete` | Delete an organization and its data |
 
 
 ## 📸 Project Screenshots
